@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Listing</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+
+    #productContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .product-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      width: 200px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .product-card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .product-card h3 {
+      font-size: 18px;
+      margin: 10px 0 5px;
+    }
+
+    .product-card p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🛒 Product Listing</h2>
+
+  <!-- Search -->
+  <input type="text" id="searchInput" placeholder="Search for a product..." />
+  <button onclick="searchProducts()">Search</button>
+
+  <!-- Sort -->
+  <select id="sortOption" onchange="sortProducts()">
+    <option value="">Sort By</option>
+    <option value="priceAsc">Prices: Low to High</option>
+    <option value="priceDesc">Prices: High to Low</option>
+    <option value="ratingAsc">Ratings: Low to High</option>
+    <option value="ratingDesc">Ratings: High to Low</option>
+  </select>
+
+  <!-- Product Container -->
+  <div id="productContainer"></div>
+
+  <script>
+    let currentProducts = [];
+
+    // Fetch all products
+    function fetchProducts(url = "https://dummyjson.com/products") {
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          currentProducts = data.products;
+          displayProducts(currentProducts);
+        })
+        .catch(error => console.error("Error fetching products:", error));
+    }
+
+    // Display products
+    function displayProducts(products) {
+      const container = document.getElementById("productContainer");
+      container.innerHTML = "";
+      if (products.length === 0) {
+        container.innerHTML = "<p>No products found.</p>";
+        return;
+      }
+
+      products.forEach(product => {
+        container.innerHTML += `
+          <div class="product-card">
+            <img src="${product.thumbnail}" alt="${product.title}" />
+            <h3>${product.title}</h3>
+            <p>Price: $${product.price}</p>
+            <p>Rating: ${product.rating}</p>
+          </div>
+        `;
+      });
+    }
+
+    // Search functionality
+    function searchProducts() {
+      const query = document.getElementById("searchInput").value.trim();
+      if (!query) {
+        alert("Search field cannot be empty!");
+        return;
+      }
+      const url = `https://dummyjson.com/products/search?q=${encodeURIComponent(query)}`;
+      fetchProducts(url);
+    }
+
+    // Sorting
+    function sortProducts() {
+      const sortValue = document.getElementById("sortOption").value;
+      let sorted = [...currentProducts];
+
+      if (sortValue === "priceAsc") sorted.sort((a, b) => a.price - b.price);
+      else if (sortValue === "priceDesc") sorted.sort((a, b) => b.price - a.price);
+      else if (sortValue === "ratingAsc") sorted.sort((a, b) => a.rating - b.rating);
+      else if (sortValue === "ratingDesc") sorted.sort((a, b) => b.rating - a.rating);
+
+      displayProducts(sorted);
+    }
+
+    // Initial load
+    fetchProducts();
+  </script>
+</body>
+</html>
